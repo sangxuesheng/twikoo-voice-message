@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  twikoo:
+    image: tingwensuojian/twikoo:latest
+    container_name: twikoo
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - NODE_ENV=production
+      - TWIKOO_DATA_PATH=/app/data
+    restart: unless-stopped
+    networks:
+      - twikoo-network
+
+networks:
+  twikoo-network:
+    driver: bridge
