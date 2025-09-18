@@ -1,6 +1,7 @@
 const os = require('os')
 const path = require('path')
 const fs = require('fs')
+const os = require('os')
 const { RES_CODE } = require('./constants')
 const logger = require('./logger')
 
@@ -47,76 +48,79 @@ exports.uploadVoice = async (event, config) => {
 
 // 腾讯云对象存储上传
 async function uploadVoiceToQcloud ({ voice, fileName, config, res }) {
-  // 腾讯云对象存储
-  const COS = require('cos-nodejs-sdk-v5')
+  try {
+    // 腾讯云对象存储
+    const COS = require('cos-nodejs-sdk-v5')
 
-  // 检查存储桶格式，腾讯云对象存储的存储桶名称应该包含APPID，格式为<bucketname>-<appid>
-  const bucketName = config.VOICE_CDN_BUCKET
-  if (!bucketName.includes('-')) {
-    throw new Error('腾讯云对象存储的存储桶名称格式不正确，应该为<bucketname>-<appid>格式，例如：mybucket-1250000000')
-  }
+    // 检查存储桶格式，腾讯云对象存储的存储桶名称应该包含APPID，格式为<bucketname>-<appid>
+    const bucketName = config.VOICE_CDN_BUCKET
+    if (!bucketName.includes('-')) {
+      throw new Error('腾讯云对象存储的存储桶名称格式不正确，应该为<bucketname>-<appid>格式，例如：mybucket-1250000000')
+    }
 
-  // 从存储桶名称中提取APPID
-  const bucketParts = bucketName.split('-')
-  const appid = bucketParts[bucketParts.length - 1]
+    // 从存储桶名称中提取APPID
+    const bucketParts = bucketName.split('-')
+    const appid = bucketParts[bucketParts.length - 1]
 
-  // 使用用户提供的腾讯云对象存储信息
-  const cos = new COS({
-    SecretId: config.VOICE_CDN_TOKEN,
-    SecretKey: config.VOICE_CDN_SECRET,
-    Domain: config.VOICE_CDN_DOMAIN,
-    Region: config.VOICE_CDN_REGION,
-    AppId: appid,
-    ForcePathStyle: true
-  })
-
-  // 生成文件路径
-  const filePath = config.VOICE_CDN_PATH || '/twikoo'
-  const fullFilePath = `${filePath}/${fileName}`
-
-  // 将base64转换为Buffer
-  const base64 = voice.split(';base64,').pop()
-  const voiceBuffer = Buffer.from(base64, 'base64')
-
-  return new Promise((resolve, reject) => {
-    cos.putObject({
-      Bucket: bucketName,
+    // 使用用户提供的腾讯云对象存储信息
+    const cos = new COS({
+      SecretId: config.VOICE_CDN_TOKEN,
+      SecretKey: config.VOICE_CDN_SECRET,
+      Domain: config.VOICE_CDN_DOMAIN,
       Region: config.VOICE_CDN_REGION,
-      Key: fullFilePath,
-      Body: voiceBuffer,
-      ContentType: 'audio/wav'
-    }, (err, data) => {
-      if (err) {
-        logger.error('腾讯云对象存储上传失败:', err)
-        logger.error('配置信息:', {
-          Bucket: bucketName,
-          Region: config.VOICE_CDN_REGION,
-          Key: fullFilePath,
-          Domain: config.VOICE_CDN_DOMAIN,
-          ContentType: 'audio/wav',
-          FileSize: voiceBuffer.length,
-          AppId: appid
-        })
-        const errorMessage = `语音上传失败: ${err.message || '未知错误'}`
-        reject(new Error(errorMessage))
-      } else {
-        // 构建访问URL
-        const url = `https://${bucketName}.${config.VOICE_CDN_DOMAIN}${fullFilePath}`
-        res.data = {
-          url: url,
-          fileName: fileName,
-          size: voiceBuffer.length
-        }
-        resolve(res)
-      }
+      AppId: appid,
+      ForcePathStyle: true
     })
-  }).catch(e => {
-    // 捕获Promise拒绝的错误，并设置到res对象中
+
+    // 生成文件路径
+    const filePath = config.VOICE_CDN_PATH || '/twikoo'
+    const fullFilePath = `${filePath}/${fileName}`
+
+    // 将base64转换为Buffer
+    const base64 = voice.split(';base64,').pop()
+    const voiceBuffer = Buffer.from(base64, 'base64')
+
+    return await new Promise((resolve, reject) => {
+      cos.putObject({
+        Bucket: bucketName,
+        Region: config.VOICE_CDN_REGION,
+        Key: fullFilePath,
+        Body: voiceBuffer,
+        ContentType: 'audio/wav'
+      }, (err, data) => {
+        if (err) {
+          logger.error('腾讯云对象存储上传失败:', err)
+          logger.error('配置信息:', {
+            Bucket: bucketName,
+            Region: config.VOICE_CDN_REGION,
+            Key: fullFilePath,
+            Domain: config.VOICE_CDN_DOMAIN,
+            ContentType: 'audio/wav',
+            FileSize: voiceBuffer.length,
+            AppId: appid
+          })
+          const errorMessage = `语音上传失败: ${err.message || '未知错误'}`
+          reject(new Error(errorMessage))
+        } else {
+          // 构建访问URL
+          const url = `https://${bucketName}.${config.VOICE_CDN_DOMAIN}${fullFilePath}`
+          res.data = {
+            url: url,
+            fileName: fileName,
+            size: voiceBuffer.length
+          }
+          resolve(res)
+        }
+      })
+    })
+  } catch (e) {
+    // 捕获所有错误，并设置到res对象中
+    logger.error('语音上传处理过程中发生错误:', e)
     res.code = RES_CODE.UPLOAD_FAILED
     res.err = e.message
     res.message = e.message
     return res
-  })
+  }
 }
 
 // Base64 URL 转换为可读流
