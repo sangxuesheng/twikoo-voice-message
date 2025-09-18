@@ -21,7 +21,7 @@
         <div class="tk-submit-action-icon OwO" v-show="config.SHOW_EMOTION === 'true'" v-html="iconEmotion" v-clickoutside="closeOwo" ref="owo"></div>
         <div class="tk-submit-action-icon" v-show="config.SHOW_IMAGE === 'true'" v-html="iconImage" @click="openSelectImage"></div>
         <input class="tk-input-image" type="file" accept="image/*" value="" ref="inputFile" @change="onSelectImage" />
-        <div class="tk-voice-container" v-show="config.SHOW_VOICE === 'true'">
+        <div class="tk-voice-container" v-show="config.SHOW_VOICE !== 'false'">
           <div class="tk-submit-action-icon tk-voice-icon" v-html="isRecording ? iconVoiceRecording : iconVoice" @click="toggleRecording"></div>
           <div class="tk-voice-status" v-if="isRecording">{{ recordingStatusText }}</div>
           <div class="tk-voice-status" v-if="showConfirmUpload">
