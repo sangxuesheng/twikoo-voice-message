@@ -960,11 +960,13 @@ async function readConfig () {
       .collection('config')
       .findOne({})
     config = res || {}
+    // 只有当SHOW_VOICE明确设置为'false'时才返回'false'，否则返回'true'
+    config.SHOW_VOICE = config.SHOW_VOICE === 'false' ? 'false' : 'true'
     return config
   } catch (e) {
     logger.error('读取配置失败：', e)
     await createCollections()
-    config = {}
+    config = { SHOW_VOICE: 'true' }
     return config
   }
 }
@@ -1021,6 +1023,27 @@ async function createCollections () {
       logger.error('建立数据库失败：', e)
     }
   }
+  
+  // 初始化默认配置
+  try {
+    const configCollection = db.collection('config')
+    const existingConfig = await configCollection.findOne({})
+    if (!existingConfig) {
+      const defaultConfig = {
+        SHOW_VOICE: 'true',
+        VOICE_CDN: 'qcloud',
+        SHOW_IMAGE: 'true',
+        SHOW_EMOTION: 'true',
+        HIGHLIGHT: 'true',
+        LIGHTBOX: 'false'
+      }
+      await configCollection.insertOne(defaultConfig)
+      logger.info('已初始化默认配置：', defaultConfig)
+    }
+  } catch (e) {
+    logger.error('初始化默认配置失败：', e)
+  }
+  
   return res
 }
 
