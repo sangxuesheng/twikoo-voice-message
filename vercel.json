@@ -1,0 +1,8 @@
+{
+  "buildCommand": "cd src/server/vercel && npm install",
+  "outputDirectory": "src/server/vercel",
+  "installCommand": "cd src/server/vercel && npm install",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/api/index" }
+  ]
+}
