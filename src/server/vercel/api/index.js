@@ -9,6 +9,7 @@ const MongoClient = require('mongodb').MongoClient
 const getUserIP = require('get-user-ip')
 const { URL } = require('url')
 const { v4: uuidv4 } = require('uuid') // 用户 id 生成
+const { uploadVoice } = require('../function/twikoo/utils')
 const {
   getCheerio,
   getAxios,
@@ -65,6 +66,23 @@ let db = null
 let config
 let accessToken
 const requestTimes = {}
+
+// 生成删除令牌
+function generateDeleteToken (commentId, uid) {
+  const timestamp = Date.now()
+  const random = Math.random().toString(36).substring(2, 15)
+  const tokenData = `${commentId}:${uid}:${timestamp}:${random}`
+  return sha256(tokenData)
+}
+
+// 保存删除令牌到评论记录
+async function saveDeleteToken (commentId, token) {
+  await db.collection('comment').findOneAndUpdate(
+    { _id: commentId },
+    { $push: { deleteTokens: token } },
+    { upsert: true }
+  )
+}
 
 module.exports = async (request, response) => {
   const event = request.body || {}
@@ -142,6 +160,14 @@ module.exports = async (request, response) => {
         break
       case 'UPLOAD_IMAGE': // >= 1.5.0
         res = await uploadImage(event, config)
+        break
+      case 'UPLOAD_VOICE':
+        logger.log('处理UPLOAD_VOICE事件')
+        res = await uploadVoice(event, config)
+        logger.log('UPLOAD_VOICE事件处理完成，结果：', res)
+        break
+      case 'COMMENT_DELETE': // 用户删除自己的评论
+        res = await commentDelete(event)
         break
       case 'COMMENT_EXPORT_FOR_ADMIN': // >= 1.6.13
         res = await commentExportForAdmin(event)
@@ -610,6 +636,17 @@ async function commentSubmit (event, request) {
   // 保存
   const comment = await save(data)
   res.id = comment.id
+  
+  // 生成删除令牌
+  const deleteToken = generateDeleteToken(comment.id, comment.uid)
+  logger.log('生成删除令牌:', { commentId: comment.id, uid: comment.uid, deleteToken })
+
+  // 保存删除令牌到评论记录
+  await saveDeleteToken(comment.id, deleteToken)
+
+  // 返回删除令牌
+  res.deleteToken = deleteToken
+
   // 异步垃圾检测、发送评论通知
   try {
     logger.log('开始异步垃圾检测、发送评论通知')
@@ -986,4 +1023,78 @@ function getIp (request) {
     logger.error('获取 IP 错误信息：', e)
   }
   return getUserIP(request)
+}
+
+// 用户删除自己的评论
+async function commentDelete (event) {
+  const res = {}
+  try {
+    // 参数校验
+    validate(event, ['id', 'token'])
+    const uid = event.accessToken
+    const commentId = event.id
+    const token = event.token
+
+    logger.log('删除评论请求:', { commentId, uid, token })
+
+    // 验证删除令牌
+    const comment = await db.collection('comment').findOne({ _id: commentId })
+    if (!comment) {
+      res.code = RES_CODE.FAIL
+      res.message = '评论不存在'
+      return res
+    }
+
+    // 验证评论所有者
+    if (comment.uid !== uid) {
+      res.code = RES_CODE.FAIL
+      res.message = '删除令牌无效或已过期'
+      return res
+    }
+
+    // 检查令牌是否有效
+    const commentTime = new Date(comment.created).getTime()
+    const currentTime = Date.now()
+    const timeDiff = currentTime - commentTime
+
+    // 检查是否在5分钟内
+    if (timeDiff > 5 * 60 * 1000) {
+      res.code = RES_CODE.FAIL
+      res.message = '删除令牌无效或已过期'
+      return res
+    }
+
+    // 验证令牌是否匹配
+    const tokens = comment.deleteTokens || []
+    if (!tokens.includes(token)) {
+      res.code = RES_CODE.FAIL
+      res.message = '删除令牌无效或已过期'
+      return res
+    }
+
+    // 删除评论及其所有回复
+    const deleteCommentAndReplies = async (id) => {
+      // 删除主评论
+      await db.collection('comment').deleteOne({ _id: id })
+
+      // 查找并删除所有回复
+      const replies = await db.collection('comment').find({ rid: id }).toArray()
+      for (const reply of replies) {
+        // 递归删除回复的回复
+        await deleteCommentAndReplies(reply._id)
+      }
+    }
+
+    // 执行删除操作
+    await deleteCommentAndReplies(commentId)
+
+    res.code = RES_CODE.SUCCESS
+    res.deleted = 1
+    res.message = '评论删除成功'
+  } catch (e) {
+    logger.error('删除评论失败：', e)
+    res.code = RES_CODE.FAIL
+    res.message = e.message
+  }
+  return res
 }
