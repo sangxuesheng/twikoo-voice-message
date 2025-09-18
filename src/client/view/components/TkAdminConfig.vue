@@ -75,7 +75,7 @@ export default {
             { key: 'IMAGE_CDN_TOKEN', desc: t('ADMIN_CONFIG_ITEM_IMAGE_CDN_TOKEN'), ph: `${t('ADMIN_CONFIG_EXAMPLE')}example`, value: '' },
             { key: 'SHOW_EMOTION', desc: t('ADMIN_CONFIG_ITEM_SHOW_EMOTION'), ph: `${t('ADMIN_CONFIG_EXAMPLE')}false`, value: '' },
             { key: 'EMOTION_CDN', desc: t('ADMIN_CONFIG_ITEM_EMOTION_CDN'), ph: '', value: '' },
-            { key: 'SHOW_VOICE', desc: t('ADMIN_CONFIG_ITEM_SHOW_VOICE'), ph: `${t('ADMIN_CONFIG_EXAMPLE')}true`, value: '' },
+            { key: 'SHOW_VOICE', desc: t('ADMIN_CONFIG_ITEM_SHOW_VOICE'), ph: `${t('ADMIN_CONFIG_EXAMPLE')}true`, value: 'true' },
             { key: 'VOICE_CDN', desc: t('ADMIN_CONFIG_ITEM_VOICE_CDN'), ph: `${t('ADMIN_CONFIG_EXAMPLE')}qcloud`, value: '' },
             { key: 'VOICE_CDN_TOKEN', desc: t('ADMIN_CONFIG_ITEM_VOICE_CDN_TOKEN'), ph: `${t('ADMIN_CONFIG_EXAMPLE')}您的腾讯云SecretId`, value: '' },
             { key: 'VOICE_CDN_SECRET', desc: t('ADMIN_CONFIG_ITEM_VOICE_CDN_SECRET'), ph: `${t('ADMIN_CONFIG_EXAMPLE')}您的腾讯云SecretKey`, value: '', secret: true },
