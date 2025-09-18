@@ -9,6 +9,7 @@ const MongoClient = require('mongodb').MongoClient
 const getUserIP = require('get-user-ip')
 const { URL } = require('url')
 const { v4: uuidv4 } = require('uuid') // 用户 id 生成
+const { uploadVoice } = require('twikoo-func/utils')
 const {
   getCheerio,
   getAxios,
@@ -16,7 +17,7 @@ const {
   getMd5,
   getSha256,
   getXml2js
-} = require('../function/twikoo/utils/lib')
+} = require('twikoo-func/utils/lib')
 const {
   getFuncVersion,
   getUrlQuery,
@@ -36,7 +37,7 @@ const {
   getConfig,
   getConfigForAdmin,
   validate
-} = require('../function/twikoo/utils')
+} = require('twikoo-func/utils')
 const {
   jsonParse,
   commentImportValine,
@@ -44,11 +45,11 @@ const {
   commentImportArtalk,
   commentImportArtalk2,
   commentImportTwikoo
-} = require('../function/twikoo/utils/import')
-const { postCheckSpam } = require('../function/twikoo/utils/spam')
-const { sendNotice, emailTest } = require('../function/twikoo/utils/notify')
-const { uploadImage, uploadVoice } = require('../function/twikoo/utils')
-const logger = require('../function/twikoo/utils/logger')
+} = require('twikoo-func/utils/import')
+const { postCheckSpam } = require('twikoo-func/utils/spam')
+const { sendNotice, emailTest } = require('twikoo-func/utils/notify')
+const { uploadImage } = require('twikoo-func/utils/image')
+const logger = require('twikoo-func/utils/logger')
 
 const $ = getCheerio()
 const axios = getAxios()
@@ -58,7 +59,7 @@ const sha256 = getSha256()
 const xml2js = getXml2js()
 
 // 常量 / constants
-const { RES_CODE, MAX_REQUEST_TIMES } = require('../function/twikoo/utils/constants')
+const { RES_CODE, MAX_REQUEST_TIMES } = require('twikoo-func/utils/constants')
 
 // 全局变量 / variables
 let db = null
@@ -71,7 +72,7 @@ function generateDeleteToken (commentId, uid) {
   const timestamp = Date.now()
   const random = Math.random().toString(36).substring(2, 15)
   const tokenData = `${commentId}:${uid}:${timestamp}:${random}`
-  return sha256(tokenData)
+  return md5(tokenData)
 }
 
 // 保存删除令牌到评论记录
@@ -161,9 +162,19 @@ module.exports = async (request, response) => {
         res = await uploadImage(event, config)
         break
       case 'UPLOAD_VOICE':
-        logger.log('处理UPLOAD_VOICE事件')
-        res = await uploadVoice(event, config)
-        logger.log('UPLOAD_VOICE事件处理完成，结果：', res)
+        try {
+          logger.log('处理UPLOAD_VOICE事件')
+          res = await uploadVoice(event, config)
+          logger.log('UPLOAD_VOICE事件处理完成，结果：', res)
+        } catch (uploadError) {
+          logger.error('UPLOAD_VOICE事件处理异常:', uploadError)
+          logger.error('UPLOAD_VOICE错误堆栈:', uploadError.stack)
+          res = {
+            code: RES_CODE.UPLOAD_FAILED,
+            message: `语音上传失败: ${uploadError.message || '未知错误'}`,
+            errorDetails: uploadError.message || '未知错误'
+          }
+        }
         break
       case 'COMMENT_DELETE': // 用户删除自己的评论
         res = await commentDelete(event)
@@ -1030,7 +1041,7 @@ async function commentDelete (event) {
   try {
     // 参数校验
     validate(event, ['id', 'token'])
-    const uid = event.accessToken
+    const uid = getUid()
     const commentId = event.id
     const token = event.token
 
