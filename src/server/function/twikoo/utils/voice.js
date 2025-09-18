@@ -1,7 +1,6 @@
 const os = require('os')
 const path = require('path')
 const fs = require('fs')
-const os = require('os')
 const { RES_CODE } = require('./constants')
 const logger = require('./logger')
 
