@@ -9,7 +9,6 @@ const MongoClient = require('mongodb').MongoClient
 const getUserIP = require('get-user-ip')
 const { URL } = require('url')
 const { v4: uuidv4 } = require('uuid') // 用户 id 生成
-const { uploadVoice } = require('../function/twikoo/utils')
 const {
   getCheerio,
   getAxios,
@@ -17,7 +16,7 @@ const {
   getMd5,
   getSha256,
   getXml2js
-} = require('twikoo-func/utils/lib')
+} = require('../function/twikoo/utils/lib')
 const {
   getFuncVersion,
   getUrlQuery,
@@ -37,7 +36,7 @@ const {
   getConfig,
   getConfigForAdmin,
   validate
-} = require('twikoo-func/utils')
+} = require('../function/twikoo/utils')
 const {
   jsonParse,
   commentImportValine,
@@ -45,11 +44,11 @@ const {
   commentImportArtalk,
   commentImportArtalk2,
   commentImportTwikoo
-} = require('twikoo-func/utils/import')
-const { postCheckSpam } = require('twikoo-func/utils/spam')
-const { sendNotice, emailTest } = require('twikoo-func/utils/notify')
-const { uploadImage } = require('twikoo-func/utils/image')
-const logger = require('twikoo-func/utils/logger')
+} = require('../function/twikoo/utils/import')
+const { postCheckSpam } = require('../function/twikoo/utils/spam')
+const { sendNotice, emailTest } = require('../function/twikoo/utils/notify')
+const { uploadImage, uploadVoice } = require('../function/twikoo/utils')
+const logger = require('../function/twikoo/utils/logger')
 
 const $ = getCheerio()
 const axios = getAxios()
@@ -59,7 +58,7 @@ const sha256 = getSha256()
 const xml2js = getXml2js()
 
 // 常量 / constants
-const { RES_CODE, MAX_REQUEST_TIMES } = require('twikoo-func/utils/constants')
+const { RES_CODE, MAX_REQUEST_TIMES } = require('../function/twikoo/utils/constants')
 
 // 全局变量 / variables
 let db = null
