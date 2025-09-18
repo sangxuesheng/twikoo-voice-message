@@ -323,7 +323,7 @@ const fn = {
         LIGHTBOX: config.LIGHTBOX || 'false',
         SHOW_EMOTION: config.SHOW_EMOTION || 'true',
         EMOTION_CDN: config.EMOTION_CDN,
-        SHOW_VOICE: config.SHOW_VOICE || 'true',
+        SHOW_VOICE: config.SHOW_VOICE === 'false' ? 'false' : 'true',
         VOICE_CDN: config.VOICE_CDN || 'qcloud',
         VOICE_CDN_TOKEN: config.VOICE_CDN_TOKEN,
         VOICE_CDN_SECRET: config.VOICE_CDN_SECRET,
