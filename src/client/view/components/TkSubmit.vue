@@ -777,7 +777,7 @@ export default {
   }
 }
 
-/* 语音按钮样式 */
+/* 语音按钮样式 - 已修复完整的CSS规则 */
 .tk-submit-action-icon.tk-voice-icon {
   display: inline-block;
   cursor: pointer;
