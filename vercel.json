@@ -1,5 +1,4 @@
 {
-{
   "version": 2,
   "builds": [
     {
@@ -16,11 +15,11 @@
   ],
   "routes": [
     {
-      "src": "/twikoo(\.nocss)?\.min\.js",
+      "src": "/twikoo(\\.nocss)?\\.min\\.js",
       "dest": "dist/twikoo$1.min.js"
     },
     {
-      "src": "/twikoo\.css",
+      "src": "/twikoo\\.css",
       "dest": "dist/twikoo.css"
     },
     {
