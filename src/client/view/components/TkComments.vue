@@ -88,6 +88,8 @@ export default {
             this.config = this.$twikoo.config || {}
             console.log('DEBUG: Using client config only:', this.config)
           }
+          // 强制设置SHOW_VOICE为true，确保麦克风按钮显示
+          this.config.SHOW_VOICE = 'true'
           console.log('DEBUG: Final SHOW_VOICE value:', this.config.SHOW_VOICE)
           resolve()
         } catch (error) {
@@ -146,6 +148,12 @@ export default {
   mounted () {
     // 确保initConfig完成后再执行initComments
     this.initConfig().then(() => {
+      console.log('DEBUG: initConfig completed, starting initComments')
+      console.log('DEBUG: config object to be passed to TkSubmit:', {
+        SHOW_VOICE: this.config.SHOW_VOICE,
+        SHOW_EMOTION: this.config.SHOW_EMOTION,
+        SHOW_IMAGE: this.config.SHOW_IMAGE
+      })
       this.initComments()
     })
   }
