@@ -67,8 +67,14 @@ export default {
       try {
         const result = await call(this.$tcb, 'GET_CONFIG')
         if (result && result.result && result.result.config) {
-          // 合并服务器配置和客户端配置，客户端配置优先
-          this.config = { ...result.result.config, ...this.$twikoo.config }
+          // 合并服务器配置和客户端配置
+          // 对SHOW_VOICE特殊处理：只有当客户端明确设置为'false'时才覆盖服务器配置
+          const clientConfig = this.$twikoo.config || {}
+          this.config = { ...result.result.config, ...clientConfig }
+          // 如果客户端没有明确设置SHOW_VOICE为'false'，则使用服务器配置的SHOW_VOICE
+          if (clientConfig.SHOW_VOICE !== 'false') {
+            this.config.SHOW_VOICE = result.result.config.SHOW_VOICE
+          }
           Vue.prototype.$twikoo.serverConfig = result.result.config
         } else {
           // 如果没有服务器配置，使用客户端配置
