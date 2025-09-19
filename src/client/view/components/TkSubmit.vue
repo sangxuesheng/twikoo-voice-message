@@ -22,7 +22,8 @@
         <div class="tk-submit-action-icon" v-show="config.SHOW_IMAGE === 'true'" v-html="iconImage" @click="openSelectImage"></div>
         <input class="tk-input-image" type="file" accept="image/*" value="" ref="inputFile" @change="onSelectImage" />
         <!-- 默认为显示麦克风按钮，除非明确设置为不显示 -->
-  <div class="tk-voice-container" v-show="config.SHOW_VOICE !== 'false'">
+  <!-- 添加了额外的防护措施，确保麦克风按钮始终显示，除非明确禁用 -->
+  <div class="tk-voice-container" v-show="!config || config.SHOW_VOICE !== 'false'">
           <div class="tk-submit-action-icon tk-voice-icon" v-html="isRecording ? iconVoiceRecording : iconVoice" @click="toggleRecording"></div>
           <div class="tk-voice-status" v-if="isRecording">{{ recordingStatusText }}</div>
           <div class="tk-voice-status" v-if="showConfirmUpload">
