@@ -624,21 +624,8 @@ export default {
     console.log('  SHOW_IMAGE:', this.config.SHOW_IMAGE)
     console.log('  isRecording:', this.isRecording)
     console.log('  Audio Blob exists:', !!this.recordedAudioBlob)
-    
-    // 添加周期性检查
-    this.configCheckInterval = setInterval(() => {
-      console.log('TkSubmit.vue - PERIODIC CHECK:', {
-        SHOW_VOICE: this.config.SHOW_VOICE,
-        elementVisible: this.isVoiceButtonVisible()
-      })
-    }, 3000)
   },
-  beforeDestroy() {
-    // 清理定时器
-    if (this.configCheckInterval) {
-      clearInterval(this.configCheckInterval)
-    }
-  },
+
   watch: {
     'config.SHOW_EMOTION': function () {
       this.initOwo()
