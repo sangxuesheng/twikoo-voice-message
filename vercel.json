@@ -4,13 +4,29 @@
     {
       "src": "src/server/vercel/api/index.js",
       "use": "@vercel/node"
+    },
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
     }
   ],
   "routes": [
+    {
+      "src": "/twikoo(\.nocss)?\.min\.js",
+      "dest": "dist/twikoo$1.min.js"
+    },
+    {
+      "src": "/twikoo\.css",
+      "dest": "dist/twikoo.css"
+    },
     {
       "src": "/(.*)",
       "dest": "src/server/vercel/api/index.js"
     }
   ],
-  "installCommand": "cd src/server/vercel && npm install"
+  "installCommand": "npm install --legacy-peer-deps",
+  "buildCommand": "npm run build"
 }
