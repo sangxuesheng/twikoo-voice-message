@@ -21,8 +21,8 @@
         <div class="tk-submit-action-icon OwO" v-show="config.SHOW_EMOTION === 'true'" v-html="iconEmotion" v-clickoutside="closeOwo" ref="owo"></div>
         <div class="tk-submit-action-icon" v-show="config.SHOW_IMAGE === 'true'" v-html="iconImage" @click="openSelectImage"></div>
         <input class="tk-input-image" type="file" accept="image/*" value="" ref="inputFile" @change="onSelectImage" />
-        <!-- 与表情和图片按钮保持一致的显示逻辑 -->
-  <div class="tk-voice-container" v-show="displayVoiceButton">
+        <!-- 与表情和图片按钮保持完全相同的显示逻辑 -->
+  <div class="tk-voice-container" v-show="config.SHOW_VOICE !== 'false'">
           <div class="tk-submit-action-icon tk-voice-icon" v-html="isRecording ? iconVoiceRecording : iconVoice" @click="toggleRecording"></div>
           <div class="tk-voice-status" v-if="isRecording">{{ recordingStatusText }}</div>
           <div class="tk-voice-status" v-if="showConfirmUpload">
@@ -148,12 +148,7 @@ export default {
       let limitLength = parseInt(this.config.LIMIT_LENGTH)
       if (Number.isNaN(limitLength)) limitLength = 500
       return limitLength > 0 ? limitLength : null
-    },
-    // 合并为一个computed块，并确保SHOW_VOICE默认值为true
-    displayVoiceButton () {
-      // 与表情和图片按钮保持一致的逻辑，但默认值为true
-      return this.config.SHOW_VOICE !== 'false'
-    }
+
   },
   methods: {
     t,
