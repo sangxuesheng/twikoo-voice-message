@@ -21,12 +21,12 @@
       "dest": "src/server/vercel/api/index.js"
     },
     {
-      "src": "/demo",
-      "dest": "/dist/demo.html"
+      "src": "^/$",
+      "dest": "src/server/vercel/api/index.js"
     },
     {
-      "src": "/(.*)",
-      "dest": "/dist/index.html"
+      "src": "/demo",
+      "dest": "/dist/demo.html"
     }
   ]
 }
