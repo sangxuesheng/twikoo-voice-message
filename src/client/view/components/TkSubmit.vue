@@ -22,8 +22,12 @@
         <div class="tk-submit-action-icon" v-show="config.SHOW_IMAGE === 'true'" v-html="iconImage" @click="openSelectImage"></div>
         <input class="tk-input-image" type="file" accept="image/*" value="" ref="inputFile" @change="onSelectImage" />
         <!-- 与表情和图片按钮保持完全相同的显示逻辑 -->
-        <!-- 暂时硬编码为true，绕过配置检查进行测试 -->
-        <div class="tk-submit-action-icon tk-voice-icon" v-show="true" v-html="isRecording ? iconVoiceRecording : iconVoice" @click="toggleRecording"></div>
+        <!-- 直接内联SVG代码，确保按钮显示 -->
+        <div class="tk-submit-action-icon tk-voice-icon" v-show="true" @click="toggleRecording">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 512 512">
+            <path fill="#409eff" d="M192 352h128V160H192v192zm144-224h-16.91c-21.65 0-41.73 8.66-56.62 23.57L160 216.15V48h-48v184c0 74.51 60.16 135.12 134.85 127.95c9.82-.96 17.61-9.66 17.61-19.66V171.57c0-10.01 7.79-18.7 17.61-19.66c74.69-7.17 134.38-63.44 134.38-127.95h-48.17c0 53.44-43.89 96.99-97.83 95.95zM48 256c0 114.87 93.13 208 208 208s208-93.13 208-208S370.87 48 256 48 48 141.13 48 256zm24 0c0-100.66 81.34-182 184-182s184 81.34 184 182S360.66 438 256 438 72 356.66 72 256z"/>
+          </svg>
+        </div>
         <div class="tk-voice-status" v-if="isRecording && true">{{ recordingStatusText }}</div>
         <div class="tk-voice-status" v-if="showConfirmUpload && true">
           <el-button size="mini" type="primary" @click="confirmUploadVoice">确认上传</el-button>
