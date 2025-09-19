@@ -22,7 +22,7 @@
         <div class="tk-submit-action-icon" v-show="config.SHOW_IMAGE === 'true'" v-html="iconImage" @click="openSelectImage"></div>
         <input class="tk-input-image" type="file" accept="image/*" value="" ref="inputFile" @change="onSelectImage" />
         <!-- 与表情和图片按钮保持完全相同的显示逻辑 -->
-        <div class="tk-submit-action-icon" v-show="config.SHOW_VOICE === 'true'" v-html="isRecording ? iconVoiceRecording : iconVoice" @click="toggleRecording"></div>
+        <div class="tk-submit-action-icon tk-voice-icon" v-show="config.SHOW_VOICE === 'true'" v-html="isRecording ? iconVoiceRecording : iconVoice" @click="toggleRecording"></div>
         <div class="tk-voice-status" v-if="isRecording && config.SHOW_VOICE === 'true'">{{ recordingStatusText }}</div>
         <div class="tk-voice-status" v-if="showConfirmUpload && config.SHOW_VOICE === 'true'">
           <el-button size="mini" type="primary" @click="confirmUploadVoice">确认上传</el-button>
@@ -680,15 +680,13 @@ export default {
 .tk-voice-icon {
   width: 0.875em; /* 缩小30%，1.25em * 0.7 = 0.875em */
 }
-.tk-voice-container {
-  display: flex;
-  align-items: center;
-}
 .tk-voice-status {
   font-size: 0.8em;
   color: #409EFF;
   margin-left: 5px;
   animation: tkPulse 1.5s infinite;
+  display: inline-block;
+  margin-right: 0.5em;
 }
 @keyframes tkPulse {
   0% {
@@ -758,12 +756,6 @@ export default {
 .tk-submit-action-icon.tk-voice-icon {
   display: inline-block;
   cursor: pointer;
-  margin-right: 0.5em;
-}
-
-.tk-voice-status {
-  display: inline-block;
-  font-size: 0.85em;
   margin-right: 0.5em;
 }
 </style>
