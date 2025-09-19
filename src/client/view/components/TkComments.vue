@@ -73,14 +73,14 @@ export default {
           if (result && result.result && result.result.config) {
             console.log('DEBUG: Server config:', result.result.config)
             // 合并服务器配置和客户端配置
-          const clientConfig = this.$twikoo.config || {}  
-          this.config = { ...result.result.config, ...clientConfig }
+            const clientConfig = this.$twikoo.config || {}  
+            this.config = { ...result.result.config, ...clientConfig }
             Vue.prototype.$twikoo.serverConfig = result.result.config
             console.log('DEBUG: Final config after merge:', this.config)
           } else {
             console.log('DEBUG: No server config available')
             // 如果没有服务器配置，使用客户端配置
-            this.config = this.$twikoo.config || {}
+            this.config = this.$twikoo.config || {} 
             console.log('DEBUG: Using client config only:', this.config)
           }
           // 强制设置SHOW_VOICE为true，确保麦克风按钮显示
@@ -89,7 +89,9 @@ export default {
           resolve()
         } catch (error) {
           console.error('Error in initConfig:', error)
-          this.config = this.$twikoo.config || {}
+          this.config = this.$twikoo.config || {} 
+          // 即使出错也强制设置SHOW_VOICE为true
+          this.config.SHOW_VOICE = 'true'
           console.log('DEBUG: Using client config due to error:', this.config)
           console.log('DEBUG: Final SHOW_VOICE value:', this.config.SHOW_VOICE)
           resolve() // 即使出错也继续，避免阻塞后续操作
@@ -150,6 +152,20 @@ export default {
         SHOW_IMAGE: this.config.SHOW_IMAGE
       })
       this.initComments()
+      
+      // 添加周期性检查，确保配置持续生效
+      setInterval(() => {
+        console.log('DEBUG: Periodic config check:', {
+          SHOW_VOICE: this.config.SHOW_VOICE,
+          SHOW_EMOTION: this.config.SHOW_EMOTION,
+          SHOW_IMAGE: this.config.SHOW_IMAGE
+        })
+        // 再次强制设置，防止任何地方意外修改
+        if (this.config.SHOW_VOICE !== 'true') {
+          console.log('DEBUG: Resetting SHOW_VOICE to true')
+          this.config.SHOW_VOICE = 'true'
+        }
+      }, 5000)
     })
   }
 }
