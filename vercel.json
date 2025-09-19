@@ -13,20 +13,6 @@
       }
     }
   ],
-  "routes": [
-    {
-      "src": "/twikoo(\\.nocss)?\\.min\\.js",
-      "dest": "dist/twikoo$1.min.js"
-    },
-    {
-      "src": "/twikoo\\.css",
-      "dest": "dist/twikoo.css"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "src/server/vercel/api/index.js"
-    }
-  ],
   "installCommand": "npm install --legacy-peer-deps",
   "buildCommand": "npm run build"
 }
