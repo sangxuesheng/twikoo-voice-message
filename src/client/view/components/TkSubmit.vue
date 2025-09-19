@@ -156,6 +156,18 @@ export default {
         this.comment = draft
       }
     },
+    // 语音功能初始化方法
+    initVoice () {
+      console.log('TkSubmit.vue - initVoice called, config.SHOW_VOICE:', this.config.SHOW_VOICE)
+      // 检查浏览器是否支持录音功能
+      if (this.config.SHOW_VOICE === 'true') {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          console.warn('浏览器不支持录音功能')
+        } else {
+          console.log('浏览器支持录音功能')
+        }
+      }
+    },
     saveDraft () {
       localStorage.setItem('twikoo-draft', this.comment)
     },
@@ -600,9 +612,12 @@ export default {
     }
     this.initDraft()
     this.initOwo()
+    this.initVoice()
     this.addEventListener()
     this.onBgImgChange()
     this.initTurnstile()
+    // 检查并记录语音功能配置状态
+    console.log('TkSubmit.vue - config.SHOW_VOICE:', this.config.SHOW_VOICE)
   },
   watch: {
     'config.SHOW_EMOTION': function () {
@@ -613,6 +628,11 @@ export default {
     },
     'config.TURNSTILE_SITE_KEY': function () {
       this.initTurnstile()
+    },
+    // 监听语音功能配置变化
+    'config.SHOW_VOICE': function (newValue) {
+      console.log('TkSubmit.vue - config.SHOW_VOICE changed to:', newValue)
+      this.initVoice()
     }
   }
 }
