@@ -21,8 +21,9 @@
         <div class="tk-submit-action-icon OwO" v-show="config.SHOW_EMOTION === 'true'" v-html="iconEmotion" v-clickoutside="closeOwo" ref="owo"></div>
         <div class="tk-submit-action-icon" v-show="config.SHOW_IMAGE === 'true'" v-html="iconImage" @click="openSelectImage"></div>
         <input class="tk-input-image" type="file" accept="image/*" value="" ref="inputFile" @change="onSelectImage" />
-        <!-- 与表情和图片按钮保持完全相同的显示逻辑和实现方式 -->
-        <div class="tk-submit-action-icon tk-voice-icon" v-show="true" v-html="iconVoice" @click="toggleRecording"></div>
+        <!-- 与表情和图片按钮保持完全相同的显示逻辑 -->
+        <!-- 暂时硬编码为true，绕过配置检查进行测试 -->
+        <div class="tk-submit-action-icon tk-voice-icon" v-show="true" v-html="isRecording ? iconVoiceRecording : iconVoice" @click="toggleRecording"></div>
         <div class="tk-voice-status" v-if="isRecording && true">{{ recordingStatusText }}</div>
         <div class="tk-voice-status" v-if="showConfirmUpload && true">
           <el-button size="mini" type="primary" @click="confirmUploadVoice">确认上传</el-button>
@@ -601,6 +602,10 @@ export default {
     },
     getVoicePlaceholder (fileIndex) {
       return `[${t('VOICE_UPLOAD_PLACEHOLDER')} ${fileIndex}]()`
+    },
+    // 检查语音按钮是否可见
+    isVoiceButtonVisible () {
+      return this.config.SHOW_VOICE === 'true' && !this.isRecording && !this.showConfirmUpload
     }
   },
   mounted () {
@@ -624,8 +629,21 @@ export default {
     console.log('  SHOW_IMAGE:', this.config.SHOW_IMAGE)
     console.log('  isRecording:', this.isRecording)
     console.log('  Audio Blob exists:', !!this.recordedAudioBlob)
+    
+    // 添加周期性检查
+    this.configCheckInterval = setInterval(() => {
+      console.log('TkSubmit.vue - PERIODIC CHECK:', {
+        SHOW_VOICE: this.config.SHOW_VOICE,
+        elementVisible: this.isVoiceButtonVisible()
+      })
+    }, 3000)
   },
-
+  beforeDestroy() {
+    // 清理定时器
+    if (this.configCheckInterval) {
+      clearInterval(this.configCheckInterval)
+    }
+  },
   watch: {
     'config.SHOW_EMOTION': function () {
       this.initOwo()
@@ -759,7 +777,7 @@ export default {
   }
 }
 
-/* 语音按钮样式 - 已修复完整的CSS规则 */
+/* 语音按钮样式 */
 .tk-submit-action-icon.tk-voice-icon {
   display: inline-block;
   cursor: pointer;
